@@ -12,7 +12,7 @@ class PingCommand(Command):
         await c.send("Pong")
 
 class healthcheck(Command):
-    @regex_triggered(r"^/healthcheck")
+    @regex_triggered(r"^/healthcheck$")
     async def handle(self, c: Context) -> None:
         try:
             response = requests.get(url="http://127.0.0.1/health")
@@ -49,6 +49,8 @@ if __name__ == "__main__":
         "phone_number": os.getenv("PHONE_NUMBER")
     })
 
-    bot.register(PingCommand(),groups=["group.VDFIZ2ZZdmw3RGROTEROelNobWdpZW55MkZQRTNjRlNGU0tPZFFFOURPVT0=","group.QjFVVW16V3hKb3hLVUFjQll0RFpRbXYvdCtOWkFweGVlWi9aT1l5M29Gdz0="]) # Run the command for all contacts and groups
+    bot.register(PingCommand(),groups=["group.VDFIZ2ZZdmw3RGROTEROelNobWdpZW55MkZQRTNjRlNGU0tPZFFFOURPVT0=","group.QjFVVW16V3hKb3hLVUFjQll0RFpRbXYvdCtOWkFweGVlWi9aT1l5M29Gdz0="])
+    ot.register(healthcheck(),groups=["group.VDFIZ2ZZdmw3RGROTEROelNobWdpZW55MkZQRTNjRlNGU0tPZFFFOURPVT0=","group.QjFVVW16V3hKb3hLVUFjQll0RFpRbXYvdCtOWkFweGVlWi9aT1l5M29Gdz0="])
 
     bot.start()
+
