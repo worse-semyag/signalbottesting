@@ -15,7 +15,7 @@ class healthcheck(Command):
     @regex_triggered(r"^/healthcheck")
     async def handle(self, c: Context) -> None:
         try:
-            response = requests.get(url="127.0.0.1/health")
+            response = requests.get(url="http://127.0.0.1/health")
             if response.status_code == 200:
                 data = response.json()
 
@@ -50,4 +50,5 @@ if __name__ == "__main__":
     })
 
     bot.register(PingCommand(),groups=["group.VDFIZ2ZZdmw3RGROTEROelNobWdpZW55MkZQRTNjRlNGU0tPZFFFOURPVT0=","group.QjFVVW16V3hKb3hLVUFjQll0RFpRbXYvdCtOWkFweGVlWi9aT1l5M29Gdz0="]) # Run the command for all contacts and groups
+
     bot.start()
