@@ -9,9 +9,11 @@ plate1 = {"code": "XYZ789"}
 plate2 = {"code": "ABC123"}
 #time = datetime.now()
 ###POST TEST PLATES
+
 requests.post(f"{platitude_url}plates/", json=plate1)
 requests.post(f"{platitude_url}plates/", json=plate2)
 #GET TEST PLATES FOR TEST SIGHTINGS 
+
 plate1data = requests.get(f"{platitude_url}plates/code/XYZ789").json()
 plate2data = requests.get(f"{platitude_url}plates/code/ABC123").json()
 print(plate1data)
@@ -33,13 +35,7 @@ plate1_sighting2 = {
          }
 
 plate2_id = plate2data["id"]
-plate2_sighting1 = {
-           "longitude": -133.4194,
-           "latitude": 38.7749,
-           "timestamp": "2026-02-10T06:30:00Z",
 
-           "plate_id": plate2_id
-         }
 
 plate2_vehice = {
            "make": "Ford",
@@ -47,19 +43,25 @@ plate2_vehice = {
            "year": "2019",
            "color": "red"
          }
-#vehicle = requests.post(f"{platitude_url}/vehicles/", json=plate2_vehice)
-#vehicle_json = vehicle.json()
-#print(type(vehicle_json))
-#plate2_vehicle_id = vehicle_json['id']
-#print(plate2_vehicle_id)
+vehicle = requests.post(f"{platitude_url}/vehicles/", json=plate2_vehice)
+vehicle_json = vehicle.json()
+print(type(vehicle_json))
+print(vehicle_json['id'])
+plate2_vehicle_id = vehicle_json['id']
+print(type(plate2_vehicle_id))
 
 
-'''
-plate2_vehice_json = {
-           "vehicle_id": {plate2_vehicle_id},
 
+
+
+plate2_sighting1 = {
+           "longitude": -133.4194,
+           "latitude": 38.7749,
+           "timestamp": "2026-02-10T06:30:00Z",
+           "plate_id": plate2_id,
+            "vehicle_id": plate2_vehicle_id,
          }
-'''
+
 
 #requests.put(f"{platitude_url}/plates/{plate2_id}", json=plate2_vehice_json)
 requests.post(f"{platitude_url}/sightings/", json=plate1_sighting1)
@@ -67,7 +69,7 @@ requests.post(f"{platitude_url}/sightings/", json=plate1_sighting2)
 requests.post(f"{platitude_url}/sightings/", json=plate2_sighting1)
 #print(response)
 #plates = requests.get(url=f"{platitude_url}/plates/code/XYZ789")
-#sightings = requests.get(url=f"{platitude_url}/sightings/")
+sightings = requests.get(url=f"{platitude_url}/sightings/")
 #sighting_data = sightings.json()
 #print(sighting_data)
 #print(plates)
