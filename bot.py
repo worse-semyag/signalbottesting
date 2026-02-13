@@ -5,19 +5,24 @@ from dotenv import load_dotenv
 from signalbot import SignalBot, Command, Context, triggered, enable_console_logging, regex_triggered
 import requests
 import json
+import httpx
 
-from commands import platecheck
+from commands import platecheck, HelpCommand
 
 class PingCommand(Command):
     @triggered("Ping")
     async def handle(self, c: Context) -> None:
         await c.send("Pong")
 
+
+
+
+
 class healthcheck(Command):
     @regex_triggered(r"^/healthcheck")
     async def handle(self, c: Context) -> None:
         try:
-            response = requests.get(url="http://127.0.0.1:8000/health")
+            response = requests.get(url=f"{platitude_url}/health")
             if response.status_code == 200:
                 data = response.json()
 
@@ -40,6 +45,7 @@ class healthcheck(Command):
 if __name__ == "__main__":
     load_dotenv()
     enable_console_logging(logging.INFO)
+    platitude_url = os.getenv("PLATITIDE_URL")
     signal_service = os.getenv("SIGNAL_SERVICE")
     print(signal_service)
     phone_number= os.getenv("PHONE_NUMBER")
@@ -50,9 +56,12 @@ if __name__ == "__main__":
         "signal_service": os.getenv("SIGNAL_SERVICE"),
         "phone_number": os.getenv("PHONE_NUMBER")
     })
-
-    bot.register(PingCommand(),groups=["group.VDFIZ2ZZdmw3RGROTEROelNobWdpZW55MkZQRTNjRlNGU0tPZFFFOURPVT0=","group.QjFVVW16V3hKb3hLVUFjQll0RFpRbXYvdCtOWkFweGVlWi9aT1l5M29Gdz0="])
-    bot.register(healthcheck(),groups=["group.VDFIZ2ZZdmw3RGROTEROelNobWdpZW55MkZQRTNjRlNGU0tPZFFFOURPVT0=","group.QjFVVW16V3hKb3hLVUFjQll0RFpRbXYvdCtOWkFweGVlWi9aT1l5M29Gdz0="])
+    #plate_cmd = platecheck()
+    #bot.register(PingCommand(),groups=["group.VDFIZ2ZZdmw3RGROTEROelNobWdpZW55MkZQRTNjRlNGU0tPZFFFOURPVT0=","group.QjFVVW16V3hKb3hLVUFjQll0RFpRbXYvdCtOWkFweGVlWi9aT1l5M29Gdz0="])
+    bot.register(healthcheck())
+    bot.register(PingCommand())
+    bot.register(HelpCommand())
+    bot.register(platecheck())
 
     bot.start()
 

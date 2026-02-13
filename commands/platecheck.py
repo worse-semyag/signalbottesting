@@ -22,28 +22,42 @@ class platecheck(Command):
         #check if plate has been entered into DB
         try: 
             async with httpx.AsyncClient() as client:
-                response = await client.get(f"{platitude_url}/plates/{raw_plate}")
+                print(platitude_url)
+                response = await client.get(f"{platitude_url}/plates/code/{raw_plate}")
             if response.status_code == 200:
                     data = response.json()
                     plate_id= data["id"]
                     plate_code =data["code"]
                     #if plate has been found we look for sightings
                     async with httpx.AsyncClient() as client:
-                         sight_response = await client.get(f"{platitude_url}/sightings/{plate_id}")
+                         sight_response = await client.get(f"{platitude_url}/sightings/plate/{plate_id}")
                          if sight_response.status_code == 200: 
                             sighting = sight_response.json()
+                            sightings_formatted = []
+                            #format sightings to look nice in signal
+                            for s in sighting:
+                                longitude = s["longitude"]
+                                latitude = s["latitude"]
+                                timestamp = s["timestamp"]
+                                plate= plate_code
+                                
+                                line = (f"Location:{longitude},{latitude}",f"Time:{timestamp}")
+                                sightings_formatted.append(line)
+                            
+                            msg = "\n\n".join(f"{loc},{time}" for loc,time in sightings_formatted)
                             #lets chat know one sighting reported
                             if len(sighting) == 1:
-                                c.send(f"One Sighting found\n {sighting}")
+                                await c.send(f"One Sighting found\n Plate: {plate}\n {msg}")
                             #lets chat know multiple sightings reported
                             if len(sighting) >1:
-                                c.send(f"Multiple Sightings found:\n {sighting}")
+                                await c.send(f"Multiple Sightings found:\n {sighting}")
                          #if no sightings reported let chat know plateadd
                          else:
-                            c.send("No Sightings found please use /plateadd to add the plate")
+                            await c.send(f"No Sightings found for plate {plate_code} please use /plateadd to add the plate")
                         
             else: 
-                    await c.reply("No P")
+                    await c.reply("No Plate")
+                    print(response.status_code)
 
         except:
             await c.reply("Unable to connect to Platitude try again later.")
