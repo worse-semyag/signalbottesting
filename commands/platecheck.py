@@ -26,11 +26,12 @@ class platecheck(Command):
                 print("http://192.168.3.141:8000")
                 response = await client.get(f"http://192.168.3.141:8000/plates/code/{raw_plate}")
             if response.status_code == 200:
+                    print("GOT PLATE")
                     data = response.json()
                     plate_id= data["id"]
                     plate_code =data["code"]
                     #if plate has been found we look for sightings
-                    async with client:
+                    async with httpx.AsyncClient() as client:
                          sight_response = await client.get(f"http://192.168.3.141:8000/sightings/plate/{plate_id}")
                          print("SIGHING TESTED")
                          if sight_response.status_code == 200: 
@@ -40,10 +41,17 @@ class platecheck(Command):
                             sightings_formatted = []
                             vehicle_info = None
                             if "vehicle_id" in sighting[0]:
-                                vehicle_id = s.get("vehicle_id")
-                                async with client:
-                                    vehicle_response = await client.get(f"http://192.168.3.141:8000/vehicle/{vehicle_id}")
+                                print("VEHICLEID FOUND")
+                                vehicle_id = sighting[0]['vehicle_id']
+                                print("VEHICLE_ID" +vehicle_id)
+                                async with httpx.AsyncClient() as client:
+                                    print("GETTING VEHICLE")
+                                    vehicle_response = await client.get(f"http://192.168.3.141:8000/vehicles/{vehicle_id}")
+                                    print("GOT VEHICLE")
+                                    print(vehicle_response)
                                     vehicle_info = vehicle_response.json()
+                            else: 
+                                print("NO VEHICLEID")
                             #format sightings to look nice in signal
                             for s in sighting:
                                 longitude = s["longitude"]
@@ -52,16 +60,22 @@ class platecheck(Command):
                                 plate= plate_code
                                 vehicle = s.get("vehicle_id", "unknown")
                                 
-                                line = (f"Location:{longitude},{latitude}",f"Time:{timestamp}")
+                                line = (f"Location:{longitude},{latitude}",f" || Time:{timestamp}")
                                 sightings_formatted.append(line)
-                            
+                            #Format VEHICLE INFO
+                            vehicle_msg = (
+                                                f"Make {vehicle_info.get('make', 'unknown')}\n"
+                                                f"Model  {vehicle_info.get('model', 'unknown')}\n"
+                                                f"Color  {vehicle_info.get('color', 'unknown')}"
+                                            )
+
                             msg = "\n\n".join(f"{loc},{time}" for loc,time in sightings_formatted)
                             #lets chat know one sighting reported
                             if len(sighting) == 1:
-                                await c.send(f"One Sighting found\n Plate: {plate}\nVehicle:{vehicle_info}\n {msg}")
+                                await c.send(f"One Sighting found\nPlate: {plate}\n{vehicle_msg}\n{msg}")
                             #lets chat know multiple sightings reported
                             if len(sighting) >1:
-                                await c.send(f"Multiple Sightings found:\n {plate}\nVehicle:{vehicle_info}\n {msg}")
+                                await c.send(f"Multiple Sightings found\nPlate: {plate}\n{vehicle_msg}\n{msg}")
                          #if no sightings reported let chat know plateadd
                          else:
                             await c.send(f"No Sightings found for plate {plate_code} please use /plateadd to add the plate")
