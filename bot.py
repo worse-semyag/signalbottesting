@@ -7,7 +7,7 @@ import requests
 import json
 import httpx
 
-from commands import platecheck, HelpCommand
+from commands import platecheck, HelpCommand, report
 
 logger = logging.getLogger(__name__)
 
@@ -49,6 +49,9 @@ if __name__ == "__main__":
     load_dotenv()
     enable_console_logging(logging.INFO)
     platitude_url = os.getenv("PLATITIDE_URL")
+    report_url = os.getenv("REPORT_URL")
+    print(report_url)
+    logger.info(report_url)
     signal_service = os.getenv("SIGNAL_SERVICE")
     logger.info(signal_service)
     phone_number= os.getenv("PHONE_NUMBER")
@@ -65,6 +68,7 @@ if __name__ == "__main__":
     bot.register(PingCommand())
     bot.register(HelpCommand())
     bot.register(platecheck(platitude_url))
+    bot.register(report(report_url))
 
     bot.start()
 
