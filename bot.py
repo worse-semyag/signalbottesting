@@ -9,6 +9,8 @@ import httpx
 
 from commands import platecheck, HelpCommand
 
+logger = logging.getLogger(__name__)
+
 class PingCommand(Command):
     @triggered("Ping")
     async def handle(self, c: Context) -> None:
@@ -22,6 +24,7 @@ class healthcheck(Command):
     @regex_triggered(r"^/healthcheck")
     async def handle(self, c: Context) -> None:
         try:
+            platitude_url = os.getenv("PLATITIDE_URL")
             response = requests.get(url=f"{platitude_url}/health")
             if response.status_code == 200:
                 data = response.json()
@@ -33,9 +36,9 @@ class healthcheck(Command):
                
                 await c.send(f"Status: {status} \nDatabase: {database} \nTimestamp: {timestamp}")
             else:
-                print(response)
+                logger.debug(response)
         except: 
-            print("NO")
+            logger.warning("Unable to connect to health")
             await c.send("Unable to connect to health")
 
             
@@ -47,9 +50,9 @@ if __name__ == "__main__":
     enable_console_logging(logging.INFO)
     platitude_url = os.getenv("PLATITIDE_URL")
     signal_service = os.getenv("SIGNAL_SERVICE")
-    print(signal_service)
+    logger.info(signal_service)
     phone_number= os.getenv("PHONE_NUMBER")
-    print(phone_number)
+    logger.info(phone_number)
 
 
     bot = SignalBot({
@@ -61,7 +64,7 @@ if __name__ == "__main__":
     bot.register(healthcheck())
     bot.register(PingCommand())
     bot.register(HelpCommand())
-    bot.register(platecheck())
+    bot.register(platecheck(platitude_url))
 
     bot.start()
 
